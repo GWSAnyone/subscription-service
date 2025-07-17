@@ -1,0 +1,343 @@
+openapi: 3.0.3
+info:
+  title: Subscription Service API
+  description: API для управления подписками пользователей
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Локальный сервер разработки
+
+tags:
+  - name: subscriptions
+    description: Операции с подписками
+
+paths:
+  /subscriptions:
+    get:
+      summary: Получить список всех подписок
+      tags:
+        - subscriptions
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Создать новую подписку
+      tags:
+        - subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Подписка успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /subscriptions/{id}:
+    get:
+      summary: Получить подписку по ID
+      tags:
+        - subscriptions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID подписки
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Подписка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      summary: Обновить подписку
+      tags:
+        - subscriptions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID подписки
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Подписка успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Подписка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      summary: Удалить подписку
+      tags:
+        - subscriptions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID подписки
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Подписка успешно удалена
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Подписка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /subscriptions/calculate-cost:
+    get:
+      summary: Рассчитать общую стоимость подписок
+      tags:
+        - subscriptions
+      parameters:
+        - name: user_id
+          in: query
+          description: ID пользователя (опционально)
+          schema:
+            type: string
+            format: uuid
+        - name: service_name
+          in: query
+          description: Название сервиса (опционально)
+          schema:
+            type: string
+        - name: start_period
+          in: query
+          required: true
+          description: Начало периода в формате MM-YYYY
+          schema:
+            type: string
+            example: "01-2023"
+        - name: end_period
+          in: query
+          required: true
+          description: Конец периода в формате MM-YYYY
+          schema:
+            type: string
+            example: "12-2023"
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalCostResponse'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор подписки
+        service_name:
+          type: string
+          description: Название сервиса предоставляющего подписку
+        price:
+          type: integer
+          format: int32
+          description: Стоимость месячной подписки в рублях
+        user_id:
+          type: string
+          format: uuid
+          description: ID пользователя
+        start_date:
+          type: string
+          format: date
+          description: Дата начала подписки
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: Дата окончания подписки (опционально)
+        created_at:
+          type: string
+          format: date-time
+          description: Время создания записи
+        updated_at:
+          type: string
+          format: date-time
+          description: Время последнего обновления записи
+      required:
+        - id
+        - service_name
+        - price
+        - user_id
+        - start_date
+        - created_at
+        - updated_at
+    
+    CreateSubscriptionRequest:
+      type: object
+      properties:
+        service_name:
+          type: string
+          description: Название сервиса предоставляющего подписку
+        price:
+          type: integer
+          format: int32
+          description: Стоимость месячной подписки в рублях
+        user_id:
+          type: string
+          format: uuid
+          description: ID пользователя
+        start_date:
+          type: string
+          description: Дата начала подписки в формате MM-YYYY
+        end_date:
+          type: string
+          nullable: true
+          description: Дата окончания подписки в формате MM-YYYY (опционально)
+      required:
+        - service_name
+        - price
+        - user_id
+        - start_date
+    
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        service_name:
+          type: string
+          description: Название сервиса предоставляющего подписку
+        price:
+          type: integer
+          format: int32
+          description: Стоимость месячной подписки в рублях
+        start_date:
+          type: string
+          description: Дата начала подписки в формате MM-YYYY
+        end_date:
+          type: string
+          nullable: true
+          description: Дата окончания подписки в формате MM-YYYY (опционально)
+    
+    TotalCostResponse:
+      type: object
+      properties:
+        total_cost:
+          type: integer
+          format: int32
+          description: Общая стоимость подписок за период
+      required:
+        - total_cost
+    
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Сообщение об ошибке
+      required:
+        - error 

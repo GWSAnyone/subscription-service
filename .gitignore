@@ -1,0 +1,46 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, coverage reports
+*.test
+*.out
+coverage.*
+coverage-html/
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.cov
+
+# Vendor directory (optional, uncomment to ignore)
+## vendor/
+
+# Dependency directories (remove the comment below if you use Go modules)
+# Uncomment if you want to ignore the build directory
+build/
+
+# IDE/editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+
+# Environment files
+.env
+*.local
+
+# Docker artifacts
+**/tmp/
+*.pid
+
+# Node modules (if any frontend is added later)
+node_modules/
+
+# Generated Swagger docs (kept, but ignore cache)
+*/docs/swagger/*cache* 

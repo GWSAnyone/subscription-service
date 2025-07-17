@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  read_timeout: 15s
+  write_timeout: 15s
+  idle_timeout: 60s
+
+database:
+  host: postgres
+  port: 5432
+  user: postgres
+  password: postgres
+  dbname: subscription_service
+  sslmode: disable
+  max_open_conns: 20
+  max_idle_conns: 5
+  conn_max_lifetime: 5m
+  migrations_path: ./migrations
+  migrations_table: schema_migrations
+
+logger:
+  level: info # debug, info, warn, error
+  format: json # json, console 

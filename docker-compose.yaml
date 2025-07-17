@@ -1,0 +1,61 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: subscription-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_DBNAME=subscription_service
+      - DATABASE_SSLMODE=disable
+      - LOGGER_LEVEL=debug
+      - LOGGER_FORMAT=console
+    volumes:
+      - ./configs:/root/configs
+      - ./docs:/root/docs
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: subscription-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=subscription_service
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Сервис для применения миграций
+  migrate:
+    image: migrate/migrate
+    container_name: subscription-migrate
+    depends_on:
+      - postgres
+    volumes:
+      - ./migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://postgres:postgres@postgres:5432/subscription_service?sslmode=disable", "up"]
+    restart: on-failure
+    
+  # Сервис для заполнения базы данных тестовыми данными
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.seed
+    container_name: subscription-seed
+    depends_on:
+      - postgres
+      - migrate
+    restart: "no"
+
+volumes:
+  postgres_data: 

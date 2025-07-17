@@ -1,0 +1,16 @@
+FROM golang:1.21-alpine
+
+WORKDIR /app
+
+# Копируем скрипт для заполнения базы данных
+COPY scripts/seed_docker.go .
+COPY go.mod go.sum ./
+
+# Устанавливаем зависимости
+RUN go mod download
+
+# Компилируем скрипт
+RUN go build -o seed_db seed_docker.go
+
+# Запускаем скрипт при старте контейнера
+CMD ["./seed_db"] 
